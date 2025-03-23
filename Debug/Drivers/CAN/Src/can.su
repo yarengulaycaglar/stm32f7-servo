@@ -1,0 +1,11 @@
+../Drivers/CAN/Src/can.c:13:13:buffer_append_int32	24	static
+../Drivers/CAN/Src/can.c:20:13:buffer_append_int16	24	static
+../Drivers/CAN/Src/can.c:26:6:comm_can_set_duty	24	static
+../Drivers/CAN/Src/can.c:34:6:comm_can_set_cb	24	static
+../Drivers/CAN/Src/can.c:42:6:comm_can_set_rpm	24	static
+../Drivers/CAN/Src/can.c:51:6:comm_can_set_pos	24	static
+../Drivers/CAN/Src/can.c:59:6:comm_can_set_origin	24	static
+../Drivers/CAN/Src/can.c:66:6:comm_can_set_current	24	static
+../Drivers/CAN/Src/can.c:74:6:comm_can_set_pos_spd	32	static
+../Drivers/CAN/Src/can.c:85:13:comm_can_transmit_eid	216	static
+../Drivers/CAN/Src/can.c:106:6:motor_receive	48	static

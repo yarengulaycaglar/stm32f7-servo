@@ -1,0 +1,65 @@
+!SESSION 2025-03-19 21:56:40.163 -----------------------------------------------
+eclipse.buildId=Version 1.14.0
+java.version=17.0.8.1
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=tr_TR
+Framework arguments:  C:\Users\Monster\Desktop\servo_pwm-main\.cproject
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 C:\Users\Monster\Desktop\servo_pwm-main\.cproject
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-19 21:58:49.123
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-19 21:58:49.126
+!MESSAGE Log4j2 initialized with config file C:\Users\Monster\Desktop\servo_pwm-main\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-19 21:58:57.775
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.core.jobs 2 2 2025-03-19 21:59:05.559
+!MESSAGE Job found still running after platform shutdown.  Jobs should be canceled by the plugin that scheduled them during shutdown: org.eclipse.ui.internal.Workbench$39
+!SESSION 2025-03-20 00:14:46.303 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=tr_TR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-20 00:15:00.213
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-20 00:15:00.215
+!MESSAGE Log4j2 initialized with config file C:\Users\Monster\Desktop\servo_pwm-main\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-20 00:15:04.754
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2025-03-20 00:16:26.913 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=tr_TR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-20 00:16:41.584
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-20 00:16:41.586
+!MESSAGE Log4j2 initialized with config file C:\Users\Monster\Desktop\servo_pwm-main\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-20 00:16:45.244
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2025-03-20 00:18:43.780 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=tr_TR
+Framework arguments:  C:\Users\Monster\Desktop\servo_pwm-main\.cproject
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 C:\Users\Monster\Desktop\servo_pwm-main\.cproject
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-20 00:18:51.134
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-20 00:18:51.136
+!MESSAGE Log4j2 initialized with config file C:\Users\Monster\Desktop\servo_pwm-main\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-20 00:18:55.825
+!MESSAGE Started RMI Server, listening on port 41337
