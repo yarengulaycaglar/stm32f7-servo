@@ -33,7 +33,7 @@ int main(void)
 		comm_can_set_rpm(controller_id, motor_speed);
 
 		/* 1 saniye bekle */
-		HAL_Delay(1000);
+		HAL_Delay(100);
 	}
 }
 
