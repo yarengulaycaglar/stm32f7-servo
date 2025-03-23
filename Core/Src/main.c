@@ -25,12 +25,12 @@ int main(void)
 	}
 
 	uint8_t controller_id = CAN_PACKET_SET_RPM;
-	float target_rpm = 0.0f;  // Hedef RPM değeri
+	//float target_rpm = 0.0f;  // Hedef RPM değeri
 
 	while (1)
 	{
 		/* RPM komutunu FDCAN üzerinden gönder */
-		comm_can_set_rpm(controller_id, target_rpm);
+		comm_can_set_rpm(controller_id, motor_speed);
 
 		/* 1 saniye bekle */
 		HAL_Delay(1000);

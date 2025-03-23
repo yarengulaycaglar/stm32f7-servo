@@ -188,7 +188,7 @@ void TIM3_IRQHandler(void)
 }
 
 
-void FDCAN1_IT_IRQHandler(void)
+void FDCAN1_IT0_IRQHandler(void)
 {
 	printf("Interrupt is triggered...\n");
     FDCAN_RxHeaderTypeDef rx_msg;
