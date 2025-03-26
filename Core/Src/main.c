@@ -8,7 +8,6 @@ static void MX_FDCAN1_Init(void);
 void Error_Handler(void);
 
 FDCAN_HandleTypeDef hfdcan1;
-
 int main(void)
 {
 	/* Sistem başlatma */
@@ -24,15 +23,20 @@ int main(void)
 		Error_Handler(); // FDCAN başlatma hatası
 	}
 
-	uint8_t controller_id = CAN_PACKET_SET_RPM;
+	/* FDCAN RX interrupt'ını etkinleştir */
+	if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, NULL) != HAL_OK)
+	{
+		Error_Handler(); // FDCAN interrupt hatası
+	}
+
+	uint8_t controller_id = 1;
 	//float target_rpm = 0.0f;  // Hedef RPM değeri
 
 	while (1)
 	{
 		/* RPM komutunu FDCAN üzerinden gönder */
-		comm_can_set_rpm(controller_id, motor_speed);
+		comm_can_set_rpm(controller_id, motor_speed, &hfdcan1);
 
-		/* 1 saniye bekle */
 		HAL_Delay(100);
 	}
 }
@@ -136,12 +140,6 @@ static void MX_FDCAN1_Init(void)
 	if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)
 	{
 		Error_Handler();
-	}
-
-	/* FDCAN RX interrupt'ını etkinleştir */
-	if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, NULL) != HAL_OK)
-	{
-		Error_Handler(); // FDCAN interrupt hatası
 	}
 }
 

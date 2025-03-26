@@ -27,20 +27,20 @@ extern float motor_current;
 extern int8_t motor_temperature;
 extern int8_t motor_error;
 
-void comm_can_set_duty(uint8_t controller_id, float duty); //Duty cycle mode
+void comm_can_set_duty(uint8_t controller_id, float duty, FDCAN_HandleTypeDef *hfdcan1); //Duty cycle mode
 
-void comm_can_set_cb(uint8_t controller_id); // Current Brake Mode
+void comm_can_set_cb(uint8_t controller_id, FDCAN_HandleTypeDef *hfdcan1); // Current Brake Mode
 
-void comm_can_set_rpm(uint8_t controller_id, float rpm); //Velocity mode
+void comm_can_set_rpm(uint8_t controller_id, float rpm, FDCAN_HandleTypeDef *hfdcan1); //Velocity mode
 
-void comm_can_set_pos(uint8_t controller_id); // Position loop mode
+void comm_can_set_pos(uint8_t controller_id, FDCAN_HandleTypeDef *hfdcan); // Position loop mode
 
-void comm_can_set_origin(uint8_t controller_id, uint8_t set_origin_mode); //Set origin mode
+void comm_can_set_origin(uint8_t controller_id, uint8_t set_origin_mode, FDCAN_HandleTypeDef *hfdcan1); //Set origin mode
 
-void comm_can_set_current(uint8_t controller_id); //Current loop mode
+void comm_can_set_current(uint8_t controller_id, FDCAN_HandleTypeDef *hfdcan1); //Current loop mode
 
-void comm_can_set_pos_spd(uint8_t controller_id, int16_t RPA ); //Position and Velocity Loop Mode
+void comm_can_set_pos_spd(uint8_t controller_id, int16_t RPA, FDCAN_HandleTypeDef *hfdcan1); //Position and Velocity Loop Mode
 
-void motor_receive(int8_t* rx_message); // Servo mode of motor message format
+void motor_receive(uint8_t* rx_message); // Servo mode of motor message format
 
 #endif /* CAN_INC_CAN_H_ */

@@ -22,8 +22,6 @@
 #include "stm32h7xx_it.h"
 #include <stdio.h>
 
-FDCAN_HandleTypeDef hfdcan;
-
 /******************************************************************************/
 /*           Cortex Processor Interruption and Exception Handlers          */
 /******************************************************************************/
@@ -192,9 +190,9 @@ void FDCAN1_IT0_IRQHandler(void)
 {
 	printf("Interrupt is triggered...\n");
     FDCAN_RxHeaderTypeDef rx_msg;
-    int8_t rx_data[8] = {0};  // Gelen veriyi tutacak array
+    uint8_t rx_data[8] = {0};  // Gelen veriyi tutacak array
 
-    if (HAL_FDCAN_GetRxMessage(&hfdcan, FDCAN_RX_FIFO0, &rx_msg, rx_data) == HAL_OK)
+    if (HAL_FDCAN_GetRxMessage(&hfdcan1, FDCAN_RX_FIFO0, &rx_msg, rx_data) == HAL_OK)
     {
         // Motor verisini al ve güncelle
         motor_receive(rx_data);

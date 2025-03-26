@@ -1,7 +1,7 @@
 #include "../Inc/can.h"
 #include <stdio.h>
 
-static void comm_can_transmit_eid(uint32_t id, const uint8_t data, uint8_t len);
+static void comm_can_transmit_eid(uint32_t id, const uint8_t data, uint8_t len, FDCAN_HandleTypeDef *hfdcan1);
 void Error_Handler(void);
 
 float motor_position = 0.0f;
@@ -23,66 +23,66 @@ static void buffer_append_int16(uint8_t* buffer, int16_t number, int16_t *index)
 }
 
 // Duty cycle mode
-void comm_can_set_duty(uint8_t controller_id, float duty) {
+void comm_can_set_duty(uint8_t controller_id, float duty, FDCAN_HandleTypeDef *hfdcan1) {
 	int32_t send_index = 0;
 	uint8_t buffer[4];
 	buffer_append_int32(buffer, (int32_t)(duty * 100000.0f), &send_index);
-	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_DUTY << 8), buffer, send_index);
+	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_DUTY << 8), buffer, send_index, hfdcan1);
 }
 
 // Current Brake Mode
-void comm_can_set_cb(uint8_t controller_id) {
+void comm_can_set_cb(uint8_t controller_id, FDCAN_HandleTypeDef *hfdcan1) {
 	int32_t send_index = 0;
 	uint8_t buffer[4];
 	buffer_append_int32(buffer, (int32_t)(motor_current * 1000.0f), &send_index);
-	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_CURRENT_BRAKE << 8), buffer, send_index);
+	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_CURRENT_BRAKE << 8), buffer, send_index, hfdcan1);
 }
 
 // Velocity mode
-void comm_can_set_rpm(uint8_t controller_id, float rpm) {
+void comm_can_set_rpm(uint8_t controller_id, float rpm, FDCAN_HandleTypeDef *hfdcan1) {
 	printf("RPM is setting...\n");
 	int32_t send_index = 0;
 	uint8_t buffer[4];
 	buffer_append_int32(buffer, (int32_t)rpm, &send_index);
-	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_RPM << 8), buffer, send_index);
+	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_RPM << 8), buffer, send_index, hfdcan1);
 }
 
 // Position loop mode
-void comm_can_set_pos(uint8_t controller_id) {
+void comm_can_set_pos(uint8_t controller_id, FDCAN_HandleTypeDef *hfdcan1) {
 	int32_t send_index = 0;
 	uint8_t buffer[4];
 	buffer_append_int32(buffer, (int32_t)(motor_position * 1000000.0f), &send_index);
-	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_POS << 8), buffer, send_index);
+	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_POS << 8), buffer, send_index, hfdcan1);
 }
 
 // Set origin mode
-void comm_can_set_origin(uint8_t controller_id, uint8_t set_origin_mode) {
+void comm_can_set_origin(uint8_t controller_id, uint8_t set_origin_mode, FDCAN_HandleTypeDef *hfdcan1) {
 	uint8_t buffer[1];
 	buffer[0] = set_origin_mode;
-	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_ORIGIN_HERE << 8), buffer, 1);
+	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_ORIGIN_HERE << 8), buffer, 1, hfdcan1);
 }
 
 // Current loop mode
-void comm_can_set_current(uint8_t controller_id) {
+void comm_can_set_current(uint8_t controller_id, FDCAN_HandleTypeDef *hfdcan1) {
 	int32_t send_index = 0;
 	uint8_t buffer[4];
 	buffer_append_int32(buffer, (int32_t)(motor_current * 1000.0f), &send_index);
-	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_CURRENT << 8), buffer, send_index);
+	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_CURRENT << 8), buffer, send_index, hfdcan1);
 }
 
 // Position and Velocity Loop Mode
-void comm_can_set_pos_spd(uint8_t controller_id, int16_t RPA) {
+void comm_can_set_pos_spd(uint8_t controller_id, int16_t RPA, FDCAN_HandleTypeDef *hfdcan1) {
 	int32_t send_index = 0;
 	int16_t send_index1 = 0;
 	uint8_t buffer[8] = {0};
 	buffer_append_int32(buffer, (int32_t)(motor_position * 10000.0f), &send_index);
 	buffer_append_int16(buffer + send_index, motor_speed, &send_index1);
 	buffer_append_int16(buffer + send_index + send_index1, RPA, &send_index1);
-	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_POS_SPD << 8), buffer, send_index + send_index1);
+	comm_can_transmit_eid(controller_id | ((uint32_t)CAN_PACKET_SET_POS_SPD << 8), buffer, send_index + send_index1, hfdcan1);
 }
 
 // Transmit fonksiyonu (FDCAN kullanılarak)
-static void comm_can_transmit_eid(uint32_t id, const uint8_t data, uint8_t len) {
+static void comm_can_transmit_eid(uint32_t id, const uint8_t data, uint8_t len, FDCAN_HandleTypeDef *hfdcan1) {
 	if (len > 8) {
 		len = 8;
 	}
@@ -95,15 +95,14 @@ static void comm_can_transmit_eid(uint32_t id, const uint8_t data, uint8_t len) 
 	TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
 	TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
 
-	FDCAN_HandleTypeDef hfdcan1;
-	if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &TxHeader, (uint8_t*)data) != HAL_OK)
+	if (HAL_FDCAN_AddMessageToTxFifoQ(hfdcan1, &TxHeader, (uint8_t*)data) != HAL_OK)
 	{
 		Error_Handler(); // Veri gönderme hatası
 	}
 }
 
 // motor_receive: CAN Rx mesajındaki veriyi işleyip global değişkenlere atar.
-void motor_receive(int8_t* rx_message)
+void motor_receive(uint8_t* rx_message)
 {
 	int16_t pos_int = rx_message[0] << 8 | rx_message[1];
 	int16_t spd_int = rx_message[2] << 8 | rx_message[3];

@@ -8,4 +8,4 @@
 ../Drivers/CAN/Src/can.c:66:6:comm_can_set_current	1
 ../Drivers/CAN/Src/can.c:74:6:comm_can_set_pos_spd	1
 ../Drivers/CAN/Src/can.c:85:13:comm_can_transmit_eid	3
-../Drivers/CAN/Src/can.c:106:6:motor_receive	1
+../Drivers/CAN/Src/can.c:105:6:motor_receive	1

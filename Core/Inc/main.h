@@ -29,6 +29,8 @@ extern "C" {
 
 void Error_Handler(void);
 
+extern FDCAN_HandleTypeDef hfdcan1;
+
 #ifdef __cplusplus
 }
 #endif
