@@ -43,4 +43,20 @@ void comm_can_set_pos_spd(uint8_t controller_id, int16_t RPA, FDCAN_HandleTypeDe
 
 void motor_receive(uint8_t* rx_message); // Servo mode of motor message format
 
+/*
+ * MIT Mode functions and variables
+ */
+extern uint8_t msg[12];
+extern float p_des;
+extern float v_des;
+extern float kp;
+extern float kd;
+extern float t_ff;
+
+void enter_motor_control_mode(uint8_t controller_id, FDCAN_HandleTypeDef *hfdcan1);
+
+void pack_cmd(float p_des, float v_des, float kp, float kd, float t_ff,  FDCAN_HandleTypeDef *hfdcan1);
+
+void unpack_reply();
+
 #endif /* CAN_INC_CAN_H_ */

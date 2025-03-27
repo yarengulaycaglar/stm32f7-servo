@@ -1,14 +1,37 @@
 #include "../Inc/can.h"
 #include <stdio.h>
 
-static void comm_can_transmit_eid(uint32_t id, const uint8_t data, uint8_t len, FDCAN_HandleTypeDef *hfdcan1);
+static void comm_can_transmit_eid(uint32_t id, uint8_t* data, uint8_t len, FDCAN_HandleTypeDef *hfdcan1);
 void Error_Handler(void);
+static float uint_to_float(int x_int, float x_min, float x_max, int bits);
+static int float_to_uint(float x, float x_min, float x_max, unsigned int bits);
 
 float motor_position = 0.0f;
 float motor_speed = 0.0f;
 float motor_current = 0.0f;
 int8_t motor_temperature = 0;
 int8_t motor_error = 0;
+
+/// limit data to be within bounds ///
+float P_MIN =-95.5;
+float P_MAX =95.5;
+float V_MIN =-30;
+float V_MAX =30;
+float T_MIN =-18;
+float T_MAX =18;
+float KP_MIN =0;
+float KP_MAX =500;
+float KD_MIN =0;
+float KD_MAX =5;
+float Test_Pos=0.0;
+
+uint8_t msg[12] = {0};
+
+float p_des=0;
+float v_des=0;
+float kp=0;
+float kd=0;
+float t_ff=0;
 
 static void buffer_append_int32(uint8_t* buffer, int32_t number, int32_t *index) {
 	buffer[(*index)++] = (number >> 24) & 0xFF;
@@ -82,7 +105,7 @@ void comm_can_set_pos_spd(uint8_t controller_id, int16_t RPA, FDCAN_HandleTypeDe
 }
 
 // Transmit fonksiyonu (FDCAN kullanılarak)
-static void comm_can_transmit_eid(uint32_t id, const uint8_t data, uint8_t len, FDCAN_HandleTypeDef *hfdcan1) {
+static void comm_can_transmit_eid(uint32_t id, uint8_t* data, uint8_t len, FDCAN_HandleTypeDef *hfdcan1) {
 	if (len > 8) {
 		len = 8;
 	}
@@ -95,7 +118,7 @@ static void comm_can_transmit_eid(uint32_t id, const uint8_t data, uint8_t len, 
 	TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
 	TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
 
-	if (HAL_FDCAN_AddMessageToTxFifoQ(hfdcan1, &TxHeader, (uint8_t*)data) != HAL_OK)
+	if (HAL_FDCAN_AddMessageToTxFifoQ(hfdcan1, &TxHeader, data) != HAL_OK)
 	{
 		Error_Handler(); // Veri gönderme hatası
 	}
@@ -115,4 +138,91 @@ void motor_receive(uint8_t* rx_message)
 	motor_error= rx_message[7] ;// Motor Error Code
 	printf("Recieving data:\n motor_position: %f\n motor_speed: %f\nmotor_current: %f\nmotor_temperature: %d\nmotor_error: %d\n",
 			motor_position, motor_speed, motor_current, motor_temperature, motor_error);
+}
+
+
+/*
+ ****************************************************************************************************************
+ * MIT MODE
+ *****************************************************************************************************************
+ */
+
+void enter_motor_control_mode(uint8_t controller_id, FDCAN_HandleTypeDef *hfdcan1) {
+    uint8_t buffer[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC}; // Motor control mode giriş mesajı
+    comm_can_transmit_eid(controller_id, buffer, sizeof(buffer), hfdcan1);
+}
+
+
+static int float_to_uint(float x, float x_min, float x_max, unsigned int bits)
+{
+	/// Converts a float to an unsigned int, given range and number of bits ///
+	float span = x_max- x_min;
+	if(x < x_min) x = x_min;
+	else if(x > x_max) x = x_max;
+	return (int) ((x- x_min)*((float)((1<<bits)/span)));
+}
+
+
+/*
+ *  Sends routine code
+ */
+void pack_cmd(float p_des, float v_des, float kp, float kd, float t_ff, FDCAN_HandleTypeDef *hfdcan1){
+	p_des = fminf(fmaxf(P_MIN, p_des), P_MAX);
+	v_des = fminf(fmaxf(V_MIN, v_des), V_MAX);
+	kp =fminf(fmaxf(KP_MIN, kp), KP_MAX);
+	kd = fminf(fmaxf(KD_MIN, kd), KD_MAX);
+	t_ff = fminf(fmaxf(T_MIN, t_ff), T_MAX);
+
+	/// convert floats to unsigned ints ///
+	int p_int = float_to_uint(p_des, P_MIN, P_MAX, 16);
+	int v_int = float_to_uint(v_des, V_MIN, V_MAX, 12);
+	int kp_int = float_to_uint(kp, KP_MIN, KP_MAX, 12);
+	int kd_int = float_to_uint(kd, KD_MIN, KD_MAX, 12);
+	int t_int = float_to_uint(t_ff, T_MIN, T_MAX, 12);
+
+	/// pack ints into the can buffer ///
+	msg[0] = p_int>>8; // Position 8 higher
+	msg[1] = p_int&0xFF;// Position 8 lower
+	msg[2] = v_int>>4; // Speed 8 higher
+	msg[3] = ((v_int&0xF)<<4)|(kp_int>>8); //Speed 4 bit lower KP 4bit higher
+	msg[4] = kp_int&0xFF; // KP 8 bit lower
+	msg[5] = kd_int>>4; // Kd 8 bit higher
+	msg[6] = ((kd_int&0xF)<<4)|(kp_int>>8); //KP 4bit lower torque 4 bit higher
+	msg[7] = t_int&0xff; // torque 4 bit lower
+	comm_can_transmit_eid(0, msg, sizeof(msg), hfdcan1);
+}
+
+
+/*
+ *  Receive routine code
+ */
+void unpack_reply(){
+	/// unpack ints from can buffer ///
+	int id = msg[0];
+	int p_int = (msg[1]<<8)|msg[2]; //Motor position data
+	int v_int = (msg[3]<<4)|(msg[4]>>4); // Motor speed data
+	int i_int = ((msg[4]&0xF)<<8)|msg[5]; // Motor torque data
+
+	/// convert ints to floats ///
+	float p = uint_to_float(p_int, P_MIN, P_MAX, 16);
+	float v = uint_to_float(v_int, V_MIN, V_MAX, 12);
+	float i = uint_to_float(i_int, T_MIN, T_MAX, 12);
+
+	// Read the corresponding data according to the ID code
+	if(id == 1){
+		p_des = p;
+		v_des = v;
+		t_ff = i;
+	}
+}
+
+
+/*
+ *  All numbers are converted to floating-point by the following function
+ */
+static float uint_to_float(int x_int, float x_min, float x_max, int bits) {
+  /// converts unsigned int to float, given range and number of bits ///
+  float span = x_max - x_min;
+  float offset = x_min;
+  return ((float)x_int)*span/((float)((1<<bits)-1)) + offset;
 }

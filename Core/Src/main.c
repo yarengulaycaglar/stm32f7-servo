@@ -24,19 +24,20 @@ int main(void)
 	}
 
 	/* FDCAN RX interrupt'ını etkinleştir */
-	if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, NULL) != HAL_OK)
+	if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
 	{
 		Error_Handler(); // FDCAN interrupt hatası
 	}
 
 	uint8_t controller_id = 1;
-	//float target_rpm = 0.0f;  // Hedef RPM değeri
+	v_des=5;
+
+	enter_motor_control_mode(controller_id, &hfdcan1);
 
 	while (1)
 	{
 		/* RPM komutunu FDCAN üzerinden gönder */
-		comm_can_set_rpm(controller_id, motor_speed, &hfdcan1);
-
+		pack_cmd(p_des, v_des, kp, kd, t_ff, &hfdcan1);
 		HAL_Delay(100);
 	}
 }
