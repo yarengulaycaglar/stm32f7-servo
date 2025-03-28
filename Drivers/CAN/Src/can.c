@@ -113,10 +113,17 @@ static void comm_can_transmit_eid(uint32_t id, uint8_t* data, uint8_t len, FDCAN
 	TxHeader.Identifier = id;
 	TxHeader.IdType = FDCAN_STANDARD_ID; // Standart ID tipi
 	TxHeader.TxFrameType = FDCAN_DATA_FRAME; // Veri çerçevesi
-	TxHeader.DataLength = len;           // Veri uzunluğu
-	TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+	TxHeader.DataLength = (len << 16); // Veri uzunluğu
+	TxHeader.ErrorStateIndicator = FDCAN_ESI_PASSIVE;
 	TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
 	TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
+	TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+	TxHeader.MessageMarker = 0;
+
+	// FIFO dolu mu kontrolü
+    	if ((hfdcan1->Instance->TXFQS & FDCAN_TXFQS_TFQF) != 0U) {
+        	return HAL_BUSY; // FIFO dolu, gönderim yapılmadı
+    	}
 
 	if (HAL_FDCAN_AddMessageToTxFifoQ(hfdcan1, &TxHeader, data) != HAL_OK)
 	{
