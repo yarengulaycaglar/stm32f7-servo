@@ -17,27 +17,14 @@ int main(void)
 	MX_GPIO_Init();
 	MX_FDCAN1_Init();
 
-	/* FDCAN'ı başlat */
-	if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
-	{
-		Error_Handler(); // FDCAN başlatma hatası
-	}
-
-	/* FDCAN RX interrupt'ını etkinleştir */
-	if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
-	{
-		Error_Handler(); // FDCAN interrupt hatası
-	}
-
 	uint8_t controller_id = 1;
-	v_des=5;
 
 	enter_motor_control_mode(controller_id, &hfdcan1);
 
 	while (1)
 	{
 		/* RPM komutunu FDCAN üzerinden gönder */
-		pack_cmd(p_des, v_des, kp, kd, t_ff, &hfdcan1);
+		pack_cmd(controller_id,p_des, v_des, kp, kd, t_ff, &hfdcan1);
 		HAL_Delay(100);
 	}
 }
@@ -116,18 +103,18 @@ static void MX_FDCAN1_Init(void)
 	hfdcan1.Init.AutoRetransmission = DISABLE;
 	hfdcan1.Init.TransmitPause = DISABLE;
 	hfdcan1.Init.ProtocolException = DISABLE;
-	hfdcan1.Init.NominalPrescaler = 16;
+	hfdcan1.Init.NominalPrescaler = 161;
 	hfdcan1.Init.NominalSyncJumpWidth = 1;
-	hfdcan1.Init.NominalTimeSeg1 = 2;
-	hfdcan1.Init.NominalTimeSeg2 = 2;
+	hfdcan1.Init.NominalTimeSeg1 = 7;
+	hfdcan1.Init.NominalTimeSeg2 = 6;
 	hfdcan1.Init.DataPrescaler = 1;
 	hfdcan1.Init.DataSyncJumpWidth = 1;
 	hfdcan1.Init.DataTimeSeg1 = 1;
 	hfdcan1.Init.DataTimeSeg2 = 1;
 	hfdcan1.Init.MessageRAMOffset = 0;
-	hfdcan1.Init.StdFiltersNbr = 0;
+	hfdcan1.Init.StdFiltersNbr = 1;
 	hfdcan1.Init.ExtFiltersNbr = 0;
-	hfdcan1.Init.RxFifo0ElmtsNbr = 0;
+	hfdcan1.Init.RxFifo0ElmtsNbr = 8;
 	hfdcan1.Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_8;
 	hfdcan1.Init.RxFifo1ElmtsNbr = 0;
 	hfdcan1.Init.RxFifo1ElmtSize = FDCAN_DATA_BYTES_8;
@@ -135,12 +122,23 @@ static void MX_FDCAN1_Init(void)
 	hfdcan1.Init.RxBufferSize = FDCAN_DATA_BYTES_8;
 	hfdcan1.Init.TxEventsNbr = 0;
 	hfdcan1.Init.TxBuffersNbr = 0;
-	hfdcan1.Init.TxFifoQueueElmtsNbr = 0;
+	hfdcan1.Init.TxFifoQueueElmtsNbr = 8;
 	hfdcan1.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
 	hfdcan1.Init.TxElmtSize = FDCAN_DATA_BYTES_8;
 	if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)
 	{
 		Error_Handler();
+	}
+	/* FDCAN RX interrupt'ını etkinleştir */
+	HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+
+	// Enable interrupts
+	HAL_NVIC_EnableIRQ(FDCAN1_IT0_IRQn);
+
+	/* FDCAN'ı başlat */
+	if (HAL_FDCAN_Start(&hfdcan1) != HAL_OK)
+	{
+		Error_Handler(); // FDCAN başlatma hatası
 	}
 }
 
@@ -150,6 +148,7 @@ void MX_GPIO_Init(void)
 
 	/* FDCAN1 pinlerini (PD0: RX, PD1: TX) yapılandır */
 	__HAL_RCC_GPIOD_CLK_ENABLE();  // GPIOD için saat aktif et
+	__HAL_RCC_FDCAN_CLK_ENABLE();
 
 	GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -172,6 +171,19 @@ void Error_Handler(void)
 	{
 	}
 }
+
+// HAL callback fonksiyonu
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
+{
+	FDCAN_RxHeaderTypeDef rx_msg;
+
+	if (HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &rx_msg, msg) == HAL_OK)
+	{
+		// Mesaj başarıyla alındı
+		unpack_reply();
+	}
+}
+
 
 #ifdef  USE_FULL_ASSERT
 /**

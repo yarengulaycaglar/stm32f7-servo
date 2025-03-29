@@ -29,9 +29,9 @@ uint8_t msg[12] = {0};
 
 float p_des=0;
 float v_des=0;
-float kp=0;
-float kd=0;
-float t_ff=0;
+float kp=100.0;
+float kd=1.0;
+float t_ff=5.0;
 
 static void buffer_append_int32(uint8_t* buffer, int32_t number, int32_t *index) {
 	buffer[(*index)++] = (number >> 24) & 0xFF;
@@ -120,11 +120,6 @@ static void comm_can_transmit_eid(uint32_t id, uint8_t* data, uint8_t len, FDCAN
 	TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
 	TxHeader.MessageMarker = 0;
 
-	// FIFO dolu mu kontrolü
-    	if ((hfdcan1->Instance->TXFQS & FDCAN_TXFQS_TFQF) != 0U) {
-        	return HAL_BUSY; // FIFO dolu, gönderim yapılmadı
-    	}
-
 	if (HAL_FDCAN_AddMessageToTxFifoQ(hfdcan1, &TxHeader, data) != HAL_OK)
 	{
 		Error_Handler(); // Veri gönderme hatası
@@ -173,13 +168,7 @@ static int float_to_uint(float x, float x_min, float x_max, unsigned int bits)
 /*
  *  Sends routine code
  */
-void pack_cmd(float p_des, float v_des, float kp, float kd, float t_ff, FDCAN_HandleTypeDef *hfdcan1){
-	p_des = fminf(fmaxf(P_MIN, p_des), P_MAX);
-	v_des = fminf(fmaxf(V_MIN, v_des), V_MAX);
-	kp =fminf(fmaxf(KP_MIN, kp), KP_MAX);
-	kd = fminf(fmaxf(KD_MIN, kd), KD_MAX);
-	t_ff = fminf(fmaxf(T_MIN, t_ff), T_MAX);
-
+void pack_cmd(uint8_t controller_id, float p_des, float v_des, float kp, float kd, float t_ff, FDCAN_HandleTypeDef *hfdcan1){
 	/// convert floats to unsigned ints ///
 	int p_int = float_to_uint(p_des, P_MIN, P_MAX, 16);
 	int v_int = float_to_uint(v_des, V_MIN, V_MAX, 12);
@@ -194,9 +183,9 @@ void pack_cmd(float p_des, float v_des, float kp, float kd, float t_ff, FDCAN_Ha
 	msg[3] = ((v_int&0xF)<<4)|(kp_int>>8); //Speed 4 bit lower KP 4bit higher
 	msg[4] = kp_int&0xFF; // KP 8 bit lower
 	msg[5] = kd_int>>4; // Kd 8 bit higher
-	msg[6] = ((kd_int&0xF)<<4)|(kp_int>>8); //KP 4bit lower torque 4 bit higher
+	msg[6] = ((kd_int&0xF)<<4)|(t_int>>8); //KP 4bit lower torque 4 bit higher
 	msg[7] = t_int&0xff; // torque 4 bit lower
-	comm_can_transmit_eid(0, msg, sizeof(msg), hfdcan1);
+	comm_can_transmit_eid(controller_id, msg, sizeof(msg), hfdcan1);
 }
 
 

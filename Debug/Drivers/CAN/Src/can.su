@@ -8,9 +8,9 @@
 ../Drivers/CAN/Src/can.c:89:6:comm_can_set_current	24	static
 ../Drivers/CAN/Src/can.c:97:6:comm_can_set_pos_spd	32	static
 ../Drivers/CAN/Src/can.c:108:13:comm_can_transmit_eid	64	static
-../Drivers/CAN/Src/can.c:128:6:motor_receive	48	static
-../Drivers/CAN/Src/can.c:150:6:enter_motor_control_mode	24	static
-../Drivers/CAN/Src/can.c:156:12:float_to_uint	32	static
-../Drivers/CAN/Src/can.c:169:6:pack_cmd	56	static
-../Drivers/CAN/Src/can.c:199:6:unpack_reply	40	static
-../Drivers/CAN/Src/can.c:223:14:uint_to_float	32	static
+../Drivers/CAN/Src/can.c:130:6:motor_receive	48	static
+../Drivers/CAN/Src/can.c:152:6:enter_motor_control_mode	24	static
+../Drivers/CAN/Src/can.c:158:12:float_to_uint	32	static
+../Drivers/CAN/Src/can.c:171:6:pack_cmd	64	static
+../Drivers/CAN/Src/can.c:195:6:unpack_reply	40	static
+../Drivers/CAN/Src/can.c:219:14:uint_to_float	32	static

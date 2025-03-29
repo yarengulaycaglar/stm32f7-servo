@@ -55,7 +55,7 @@ extern float t_ff;
 
 void enter_motor_control_mode(uint8_t controller_id, FDCAN_HandleTypeDef *hfdcan1);
 
-void pack_cmd(float p_des, float v_des, float kp, float kd, float t_ff,  FDCAN_HandleTypeDef *hfdcan1);
+void pack_cmd(uint8_t controller_id, float p_des, float v_des, float kp, float kd, float t_ff,  FDCAN_HandleTypeDef *hfdcan1);
 
 void unpack_reply();
 
